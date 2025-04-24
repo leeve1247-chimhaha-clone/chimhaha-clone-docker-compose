@@ -1,0 +1,43 @@
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak-container
+    command: start-dev
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres-container:5432/${KC_DB}
+      - KC_DB_USERNAME=${KC_DB_USERNAME}
+      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
+    depends_on:
+      - postgres
+    networks:
+      - internal
+    volumes:
+      - ./keycloak-providers:/opt/keycloak/providers
+      - ./keycloak-themes:/opt/keycloak/themes
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container
+    environment:
+      - POSTGRES_USER=${KC_DB_USERNAME}
+      - POSTGRES_PASSWORD=${KC_DB_PASSWORD}
+      - POSTGRES_DB=${KC_DB}
+    volumes:
+      - postgres_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+
+volumes:
+  postgres_db_data:
+
+networks:
+  internal:
+    driver: bridge
