@@ -1,0 +1,44 @@
+services:
+  nginx:
+    volumes:
+      - ./credentials/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      - "8090:8090"
+    networks:
+      - internal
+    depends_on:
+      - keycloak
+
+  keycloak:
+    command: ${KEYCLOAK_COMMAND}
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres-container:5432/${KC_DB}
+      - KC_DB_USERNAME=${KC_DB_USERNAME}
+      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
+      - KC_HOSTNAME=${KC_HOSTNAME}
+
+  postgres:
+    environment:
+      - POSTGRES_USER=${KC_DB_USERNAME}
+      - POSTGRES_PASSWORD=${KC_DB_PASSWORD}
+      - POSTGRES_DB=${KC_DB}
+
+  spring:
+    build:
+      dockerfile: ProdDockerfile
+
+  mysql:
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+volumes:
+  mysql-db-data:
+  postgres-db-data:
+  redis-data:
+  minio-data:
+
+networks:
+  internal:
+    driver: bridge
