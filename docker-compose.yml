@@ -45,14 +45,57 @@ services:
       - POSTGRES_PASSWORD=${KC_DB_PASSWORD}
       - POSTGRES_DB=${KC_DB}
     volumes:
-      - postgres_db_data:/var/lib/postgresql/data
+      - postgres-db-data:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:5432:5432"
     networks:
       - internal
 
+#  This is for cache backend data
+  redis:
+    image: redis:latest
+    container_name: redis-container
+    networks:
+      - internal
+    volumes:
+      - redis-data:/data
+
+  spring:
+    container_name: spring-container
+    build:
+      context: ./spring
+      dockerfile: ./spring/Dockerfile
+    networks:
+      - internal
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d/:ro
+      - mysql-db-data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+    networks:
+      - internal
+
+  minio:
+    image: minio/minio
+    container_name: minio-container
+    command: server /data --console-address :9001
+    volumes:
+      - minio-data:/data
+    networks:
+      - internal
+
+
+
 volumes:
-  postgres_db_data:
+  postgres-db-data:
+  redis-data:
+  minio-data:
 
 networks:
   internal:
