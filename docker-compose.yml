@@ -11,6 +11,20 @@ services:
     depends_on:
       - keycloak
 
+  vite-app:
+    profiles:
+      - dev
+    container_name: vite-container
+    build:
+      context: ./vite
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./vite:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -62,6 +76,8 @@ services:
     build:
       context: ./spring
       dockerfile: LocalDockerfile
+    ports:
+      - "8080:8080"
     networks:
       - internal
 
