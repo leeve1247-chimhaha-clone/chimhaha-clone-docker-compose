@@ -4,3 +4,6 @@
 [submodule "SPA"]
 	path = SPA
 	url = git@github.com:leeve1247/chimhaha-clone-frontend-dist.git
+[submodule "spring"]
+	path = spring
+	url = git@github.com:leeve1247-chimhaha-clone/chimhaha-clone-backend.git
