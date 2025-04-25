@@ -1,6 +1,6 @@
 [submodule "credentials"]
 	path = credentials
-	url = https://github.com/leeve1247/chimhaha-clone-docker-compose-credential
+	url = git@github.com:leeve1247/chimhaha-clone-docker-compose-credential.git
 [submodule "SPA"]
 	path = SPA
-	url = https://github.com/leeve1247/chimhaha-clone-frontend-dist
+	url = git@github.com:leeve1247/chimhaha-clone-frontend-dist.git
