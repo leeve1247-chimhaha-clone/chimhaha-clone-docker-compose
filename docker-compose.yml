@@ -26,6 +26,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -111,7 +112,6 @@ volumes:
   postgres-db-data:
   redis-data:
   minio-data:
-  seaweedfs-data:
 
 networks:
   internal:
