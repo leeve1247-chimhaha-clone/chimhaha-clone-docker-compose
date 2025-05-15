@@ -23,7 +23,7 @@ services:
       - "5173:5173"
     volumes:
       - ./vite:/app
-      - /app/node_modules
+      - vite-node-modules:/app/node_modules
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
@@ -108,6 +108,7 @@ services:
       - internal
 
 volumes:
+  vite-node-modules:
   mysql-db-data:
   postgres-db-data:
   redis-data:
