@@ -1,40 +1,100 @@
 services:
   nginx:
+    image: nginx:latest
+    container_name: nginx-container
     volumes:
-      - ./credentials/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./vite/dist:/usr/share/nginx/html
     ports:
-      - "80:80"
-      - "8090:8090"
+      - "8080:80" # Front
+      - "8090:8090" # Auth
+      - "9000:9000" # FileSystem
     networks:
       - internal
     depends_on:
       - keycloak
 
   keycloak:
-    command: ${KEYCLOAK_COMMAND}
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak-container
+    command: start
     environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
       - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://postgres-container:5432/${KC_DB}
-      - KC_DB_USERNAME=${KC_DB_USERNAME}
-      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
-      - KC_HOSTNAME=${KC_HOSTNAME}
+      - KC_DB_URL=jdbc:postgresql://postgres-container:5432/kc_db
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=postgres
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME=https://auth.00719293.xyz
+      - KC_HOSTNAME_ADMIN=http://192.168.1.14:8090
+    depends_on:
+      - postgres
+    networks:
+      - internal
+    volumes:
+      - ./keycloak-providers:/opt/keycloak/providers
+      - ./keycloak-themes:/opt/keycloak/themes
 
   postgres:
+    image: postgres:latest
+    container_name: postgres-container
     environment:
-      - POSTGRES_USER=${KC_DB_USERNAME}
-      - POSTGRES_PASSWORD=${KC_DB_PASSWORD}
-      - POSTGRES_DB=${KC_DB}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=kc_db
+    volumes:
+      - postgres-db-data:/var/lib/postgresql
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - internal
+
+  #  This is for cache backend data
+  redis:
+    image: redis:latest
+    container_name: redis-container
+    networks:
+      - internal
+    volumes:
+      - redis-data:/data
 
   spring:
+    container_name: spring-container
     build:
+      context: ./spring
       dockerfile: ProdDockerfile
+    ports:
+      - "8081:8080"
+    networks:
+      - internal
 
   mysql:
+    image: mysql:latest
+    container_name: mysql-container
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql:ro
+      - mysql-db-data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+    networks:
+      - internal
+
+  minio:
+    image: minio/minio
+    container_name: minio-container
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9001:9001"
+    networks:
+      - internal
 
 volumes:
+  vite-node-modules:
   mysql-db-data:
   postgres-db-data:
   redis-data:
