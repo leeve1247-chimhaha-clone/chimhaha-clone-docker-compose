@@ -4,44 +4,33 @@ services:
     container_name: nginx-container
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./credentials/cert.pem:/etc/nginx/certs/cert.pem
+      - ./credentials/cert.key:/etc/nginx/certs/cert.key
     ports:
-      - "8090:8090"
-      - "9000:9000"
+      - "8090:8090" # Auth
     networks:
       - internal
     depends_on:
       - keycloak
 
-  vite-app:
-    profiles:
-      - dev
-    container_name: vite-container
-    build:
-      context: ./vite
-      dockerfile: Dockerfile
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./vite:/app
-      - vite-node-modules:/app/node_modules
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak-container
-    command: start-dev
+    command: start
     environment:
       - KC_BOOTSTRAP_ADMIN_USERNAME=admin
       - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
-      - KC_PROXY_HEADERS=xforwarded
+
       - KC_DB=postgres
       - KC_DB_URL=jdbc:postgresql://postgres-container:5432/kc_db
       - KC_DB_USERNAME=postgres
       - KC_DB_PASSWORD=postgres
+
+      - KC_HOSTNAME=https://localhost:8090
+      - KC_HOSTNAME_ADMIN=https://localhost:8090
+      - KC_PROXY_HEADERS=xforwarded
       - KC_HTTP_ENABLED=true
-      - KC_HOSTNAME=http://localhost:8090
+
     depends_on:
       - postgres
     networks:
@@ -57,14 +46,16 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=kc_db
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - postgres-db-data:/var/lib/postgresql/data
+      - postgres-db:/var/lib/postgresql
     ports:
       - "127.0.0.1:5432:5432"
     networks:
       - internal
 
-#  This is for cache backend data
+  #  This is for cache backend data
   redis:
     image: redis:latest
     container_name: redis-container
@@ -77,7 +68,7 @@ services:
     container_name: spring-container
     build:
       context: ./spring
-      dockerfile: LocalDockerfile
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     networks:
@@ -96,23 +87,26 @@ services:
     networks:
       - internal
 
-  minio:
-    image: minio/minio
-    container_name: minio-container
-    command: server /data --console-address ":9001"
+  seaweedfs-s3:
+    container_name: seaweedfs-s3
+    image: chrislusf/seaweedfs
+    command: server -s3
     volumes:
-      - minio-data:/data
+      - seaweedfs-s3-data:/data
     ports:
-      - "9001:9001"
+      - "9000:8333"  # S3 API
+      - "9333:9333"  # Master
+      - "8888:8888"
     networks:
       - internal
 
 volumes:
-  vite-node-modules:
   mysql-db-data:
   postgres-db-data:
+  postgres-db:
   redis-data:
-  minio-data:
+  seaweedfs-s3-data:
+  vite-node-modules:
 
 networks:
   internal:
