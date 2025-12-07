@@ -3,6 +3,11 @@
     <deployment type="docker-compose.yml">
       <settings>
         <option name="envFilePath" value="" />
+        <option name="envFilePaths">
+          <list>
+            <option value="" />
+          </list>
+        </option>
         <option name="removeImagesOnComposeDown" value="ALL" />
         <option name="commandLineOptions" value="--build" />
         <option name="services">
@@ -14,8 +19,7 @@
       </settings>
     </deployment>
     <method v="2">
-      <option name="Gradle.BeforeRunTask" enabled="false" tasks="build -x test" externalProjectPath="$PROJECT_DIR$/spring" vmOptions="" scriptParameters="" />
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="extractJar" externalProjectPath="$PROJECT_DIR$/spring" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="false" tasks="extractJar" externalProjectPath="$PROJECT_DIR$/spring" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>
