@@ -90,8 +90,9 @@ services:
   seaweedfs-s3:
     container_name: seaweedfs-s3
     image: chrislusf/seaweedfs
-    command: server -s3
+    command: server -s3 -s3.config=/etc/seaweedfs/s3.json
     volumes:
+      - ./credentials/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
       - seaweedfs-s3-data:/data
     ports:
       - "9000:8333"  # S3 API

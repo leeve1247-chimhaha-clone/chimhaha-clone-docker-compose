@@ -12,7 +12,6 @@
       </settings>
     </deployment>
     <method v="2">
-      <option name="Gradle.BeforeRunTask" enabled="false" tasks="build -x test" externalProjectPath="$PROJECT_DIR$/spring" vmOptions="" scriptParameters="" />
       <option name="Gradle.BeforeRunTask" enabled="true" tasks="extractJar" externalProjectPath="$PROJECT_DIR$/spring" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
