@@ -73,6 +73,11 @@ services:
       - "8080:8080"
     networks:
       - internal
+    depends_on:
+      - mysql
+      - seaweedfs-s3
+      - redis
+      - keycloak
 
   mysql:
     image: mysql:latest
