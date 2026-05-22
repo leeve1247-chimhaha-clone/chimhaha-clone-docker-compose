@@ -1,6 +1,18 @@
 SET NAMES 'utf8mb4'; # 이렇게 해야 datagrip 과 mysql 사이에 인코딩 오류가 사라짐
 CREATE DATABASE IF NOT EXISTS clone_database;
 use clone_database;
+
+CREATE TABLE IF NOT EXISTS outbox_event (
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    aggregate_type VARCHAR(64)  NOT NULL,
+    aggregate_id   VARCHAR(64)  NOT NULL,
+    event_type     VARCHAR(64)  NOT NULL,
+    payload        JSON         NOT NULL,
+    created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    published_at   TIMESTAMP    NULL,
+    INDEX idx_outbox_pending (published_at, id)
+);
+
 drop table if Exists post_category;
 create table post_category
 (
