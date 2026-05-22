@@ -145,8 +145,8 @@ services:
     volumes:
       - ./mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql:ro
       - mysql-db-data:/var/lib/mysql
-    # Host port binding removed (Phase 0 workaround for Windows winnat conflict).
-    # Spring connects via internal docker network. Re-add "127.0.0.1:3306:3306" once host port is free.
+    ports:
+      - "127.0.0.1:13306:3306"  # 3306 blocked on Windows by hidden TCP reservation; host tools (DataGrip 등) use 13306
     networks:
       - internal
     healthcheck:
