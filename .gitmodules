@@ -7,3 +7,6 @@
 [submodule "vite"]
 	path = vite
 	url = https://github.com/leeve1247-chimhaha-clone/chimhaha-clone-frontend.git
+[submodule "spring-notification"]
+	path = spring-notification
+	url = git@github.com:leeve1247-chimhaha-clone/spring-notification.git

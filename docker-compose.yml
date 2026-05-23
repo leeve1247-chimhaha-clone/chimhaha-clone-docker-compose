@@ -137,6 +137,41 @@ services:
       kafka:
         condition: service_healthy
 
+  notification:
+    container_name: notification-container
+    build:
+      context: ./spring-notification
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8081:8080"
+    networks:
+      - internal
+    depends_on:
+      mysql-notification:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  mysql-notification:
+    image: mysql:9.6
+    container_name: mysql-notification-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./mysql-notification-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - mysql-notification-data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:13307:3306"  # host access for DataGrip; container internal stays on 3306
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   mysql:
     image: mysql:9.6
     container_name: mysql-container
@@ -164,13 +199,14 @@ services:
       - seaweedfs-s3-data:/data
     ports:
       - "9000:8333"  # S3 API
-      - "9333:9333"  # Master
+      - "19333:9333"  # Master (host 9333 blocked by Windows winnat 9278-9377)
       - "8888:8888"
     networks:
       - internal
 
 volumes:
   mysql-db-data:
+  mysql-notification-data:
   postgres-db-data:
   redis-data:
   seaweedfs-s3-data:
