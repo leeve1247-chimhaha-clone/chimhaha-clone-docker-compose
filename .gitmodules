@@ -10,3 +10,6 @@
 [submodule "spring-notification"]
 	path = spring-notification
 	url = git@github.com:leeve1247-chimhaha-clone/spring-notification.git
+[submodule "spring-image"]
+	path = spring-image
+	url = git@github.com:leeve1247-chimhaha-clone/spring-image.git

@@ -17,6 +17,8 @@ services:
         condition: service_started
       notification:
         condition: service_started
+      image:
+        condition: service_started
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.5
@@ -175,6 +177,40 @@ services:
       timeout: 5s
       retries: 10
 
+  image:
+    container_name: image-container
+    build:
+      context: ./spring-image
+      dockerfile: Dockerfile
+    # host port 노출 없음 — gateway(nginx 8090) 경유만 (zero-trust 정합).
+    networks:
+      - internal
+    depends_on:
+      mysql-image:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  mysql-image:
+    image: mysql:9.6
+    container_name: mysql-image-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./mysql-image-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - mysql-image-data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:13308:3306"  # host access for DataGrip; container internal stays on 3306
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   mysql:
     image: mysql:9.6
     container_name: mysql-container
@@ -210,6 +246,7 @@ services:
 volumes:
   mysql-db-data:
   mysql-notification-data:
+  mysql-image-data:
   postgres-db-data:
   redis-data:
   seaweedfs-s3-data:
