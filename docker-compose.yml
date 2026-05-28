@@ -13,6 +13,10 @@ services:
     depends_on:
       keycloak:
         condition: service_started
+      spring:
+        condition: service_started
+      notification:
+        condition: service_started
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.5
@@ -142,8 +146,7 @@ services:
     build:
       context: ./spring-notification
       dockerfile: Dockerfile
-    ports:
-      - "127.0.0.1:8081:8080"
+    # host port 노출 없음 — gateway(nginx 8090) 경유만 (zero-trust 정합).
     networks:
       - internal
     depends_on:
